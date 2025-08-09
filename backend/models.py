@@ -54,7 +54,9 @@ class UserProfileUpdate(BaseModel):
 
 
 class UserProfileRead(MongoReadModel, UserProfileBase):
-    pass
+    # Allow documents without email/linkedin_url (e.g., scraped profiles) to validate on read
+    email: Optional[EmailStr] = None
+    linkedin_url: Optional[str] = None
 
 
 # -----------------------------
