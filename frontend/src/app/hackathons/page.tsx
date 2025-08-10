@@ -120,15 +120,45 @@ export default function HackathonsPage() {
       <Card>
         <CardHeader title="Create Hackathon" subtitle="AI will generate a structured plan based on your inputs." />
         <CardBody>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input placeholder="Topic" className="glass-input" value={topic} onChange={(e) => setTopic(e.target.value)} />
-            <input placeholder="Target audience" className="glass-input" value={audience} onChange={(e) => setAudience(e.target.value)} />
-            <input placeholder="Location" className="glass-input" value={location} onChange={(e) => setLocation(e.target.value)} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input 
+              placeholder="Topic" 
+              className="glass-input" 
+              value={topic} 
+              onChange={(e) => setTopic(e.target.value)} 
+            />
+            <input 
+              placeholder="Target audience" 
+              className="glass-input" 
+              value={audience} 
+              onChange={(e) => setAudience(e.target.value)} 
+            />
+            <input 
+              placeholder="Location" 
+              className="glass-input" 
+              value={location} 
+              onChange={(e) => setLocation(e.target.value)} 
+            />
             <div className="flex gap-3">
-              <input placeholder="Start date" className="glass-input flex-1" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              <input placeholder="End date" className="glass-input flex-1" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              <input
+                placeholder="Start date (DD MM YYYY)"
+                className="glass-input flex-1"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <input
+                placeholder="End date (DD MM YYYY)"
+                className="glass-input flex-1"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
             </div>
-            <textarea placeholder="Description" className="glass-input sm:col-span-2 min-h-24" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <textarea 
+              placeholder="Description" 
+              className="glass-input sm:col-span-2 min-h-24" 
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)} 
+            />
           </div>
           <div className="mt-4 flex justify-end">
             <Button onClick={submitDraft} disabled={!topic || submitting}>
