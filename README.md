@@ -245,3 +245,55 @@ curl -sS "http://localhost:8000/profiles/?limit=10"
   - Chrome flags (`--disable-gpu`, `--no-sandbox`) set; further tuning may be needed
 
 
+---
+
+## Frontend (Hours 4–8) – Design Plan and Feature Map
+
+We are building a premium, black/white, translucent “glass” interface inspired by Apple’s design language.
+
+### Design system
+- Colors: deep black background, soft white text, muted gray, bright white accents
+- Surfaces: translucent glass panels with blur, subtle borders, soft elevated shadows
+- Typography: Geist Sans/Mono, generous letter‑spacing for headings
+- Layout: centered content (`max-width: 1200px`), sticky glass navbar, large section paddings
+- Interactions: clear focus rings, smooth hover/active states, skeleton loaders
+
+### Core UI components (to build and reuse)
+- Card (glass surface container)
+- SectionHeader (title + description)
+- Stat (compact metric with label)
+- Table/List (rows with subtle dividers)
+- Badge/Chip (small highlight labels)
+- Button (glass variant + subtle hover)
+- Skeleton (loading shimmer/blocks)
+
+### Pages and features (accessible via navbar)
+- Dashboard (/dashboard)
+  - Key stats: total profiles, invites generated/sent (basic), teams, challenges
+  - Recent activity preview (latest profiles/challenges/teams)
+  - Quick actions: “Find AI Developers”, “Generate Challenge”, “Send Outreach (dry)”
+- Community (/community)
+  - Real‑time/polled feed: joins, team formations, challenge posts
+  - Member directory (basic list, search later)
+- Challenges (/challenges)
+  - Challenge board listing: title, difficulty, participants count
+  - Detail view (later): description, requirements, criteria
+- Teams (/teams)
+  - Team discovery: list with filters (by challenge)
+  - Join/Create flows (UI scaffolding first)
+
+### Data integration plan
+- Use `NEXT_PUBLIC_API_BASE_URL` to call the FastAPI backend
+- Phase 1: client components fetch lists (first page) and show counts/rows
+- Phase 2: add server actions or dedicated backend count endpoints for accurate metrics
+- Phase 3: WebSocket/polling for community feed
+
+### Implementation roadmap
+1) Design tokens, glass utilities, navbar, home CTA – done
+2) Scaffolding pages: dashboard, community, challenges, teams – next
+3) Build core UI components (Card, SectionHeader, Stat, Skeleton, Table) – next
+4) Wire API calls for lists; show loaders and errors – next
+5) Add filters/search; refine layouts and empty states – later
+6) Charts for dashboard (Chart.js) – later
+
+
