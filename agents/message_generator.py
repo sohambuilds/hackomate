@@ -100,7 +100,7 @@ async def main_async(limit: int, model_name: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Gemini message generator")
     parser.add_argument("--limit", type=int, default=10)
-    parser.add_argument("--model", type=str, default="gemini-1.5-flash")
+    parser.add_argument("--model", type=str, default="gemini-2.0-flash")
     args = parser.parse_args()
     # Ensure .env is loaded for CLI executions as well
     load_dotenv()

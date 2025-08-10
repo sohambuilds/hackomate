@@ -147,12 +147,24 @@ class Workshop(BaseModel):
     }
 
 
+class ProblemStatement(BaseModel):
+    title: str
+    description: str
+    difficulty: Optional[str] = None
+    skills_required: List[str] = Field(default_factory=list)
+
+    model_config = {
+        "str_strip_whitespace": True,
+    }
+
+
 class HackathonPlan(BaseModel):
     target_audience: Optional[str] = None
     location: Optional[str] = None
     dates: Optional[str] = None
     workshops: List[Workshop] = Field(default_factory=list)
     agenda: List[AgendaItem] = Field(default_factory=list)
+    problem_statements: List[ProblemStatement] = Field(default_factory=list)
 
     model_config = {
         "str_strip_whitespace": True,
@@ -229,6 +241,7 @@ __all__ = [
     # Hackathon
     "AgendaItem",
     "Workshop",
+    "ProblemStatement",
     "HackathonPlan",
     "HackathonBase",
     "HackathonDraft",

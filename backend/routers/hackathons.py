@@ -118,14 +118,14 @@ def _configure_gemini(api_key: Optional[str]) -> None:
 
 PLAN_PROMPT = (
     """
-You are an expert hackathon organizer. Given the inputs, produce a structured JSON plan with the following shape:
-{
-  "target_audience": string,
-  "location": string,
-  "dates": string,
-  "workshops": [ {"title": string, "description": string} ],
-  "agenda": [ {"time": string, "title": string, "description": string} ]
-}
+You are an expert hackathon organizer. Given the inputs, produce a structured plan as a single JSON object.
+The JSON must include keys:
+- target_audience (string)
+- location (string)
+- dates (string)
+- workshops (array of objects with fields: title, description)
+- agenda (array of objects with fields: time, title, description)
+
 Inputs:
 - Topic: {topic}
 - Description: {description}
@@ -133,9 +133,56 @@ Inputs:
 - Location: {location}
 - Dates: {dates}
 
-Output only JSON, no extra text.
+Respond with ONLY the JSON object. No markdown, no commentary.
 """
 ).strip()
+
+PROBLEMS_PROMPT = (
+    """
+You are an expert hackathon organizer. Create engaging problem statements for a hackathon.
+Generate a JSON array of problem statements, each with these fields:
+- title (string): Clear, compelling problem title
+- description (string): Detailed problem description with context and goals
+- difficulty (string): "easy", "medium", or "hard"
+- skills_required (array of strings): Key skills needed
+
+Topic: {topic}
+Description: {description}
+Target audience: {audience}
+
+Create 3-5 diverse, interesting problem statements that match the hackathon theme.
+Respond with ONLY the JSON array. No markdown, no commentary.
+"""
+).strip()
+
+
+def _parse_json_from_text(text: str) -> dict:
+    import json
+    import re
+
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+
+    # Strip code fences if present
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        # Remove first and last code fence blocks
+        lines = [ln for ln in stripped.splitlines() if not ln.strip().startswith("```")]
+        stripped = "\n".join(lines)
+
+    # Extract first JSON object via regex
+    match = re.search(r"\{[\s\S]*\}", stripped)
+    if match:
+        candidate = match.group(0)
+        try:
+            return json.loads(candidate)
+        except Exception:
+            pass
+
+    raise HTTPException(status_code=502, detail="Failed to parse plan JSON from Gemini")
 
 
 @router.post("/generate-plan", response_model=HackathonRead)
@@ -148,7 +195,7 @@ async def generate_plan(
     api_key = os.getenv("GOOGLE_API_KEY")
     _configure_gemini(api_key)
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash")
     prompt = PLAN_PROMPT.format(
         topic=draft.topic,
         description=draft.description or "",
@@ -160,11 +207,7 @@ async def generate_plan(
     # Run blocking call in thread
     resp = await asyncio.to_thread(model.generate_content, prompt)
     text = resp.text if hasattr(resp, "text") else str(resp)
-    import json
-    try:
-        plan_dict = json.loads(text)
-    except Exception:
-        raise HTTPException(status_code=502, detail="Failed to parse plan JSON from Gemini")
+    plan_dict = _parse_json_from_text(text)
 
     # Compose hackathon doc and persist
     doc = {
@@ -179,6 +222,70 @@ async def generate_plan(
         "plan": plan_dict,
     }
     await db["hackathons"].insert_one(doc)
+    return HackathonRead.model_validate(_normalize_id(doc))
+
+
+@router.post("/{hackathon_id}/generate-problems", response_model=HackathonRead)
+async def generate_problem_statements(
+    hackathon_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+):
+    """Generate problem statements for an existing hackathon using Gemini."""
+    load_dotenv()
+    api_key = os.getenv("GOOGLE_API_KEY")
+    _configure_gemini(api_key)
+
+    # Check hackathon exists
+    hack = await db["hackathons"].find_one({"_id": hackathon_id})
+    if not hack and ObjectId.is_valid(hackathon_id):
+        hack = await db["hackathons"].find_one({"_id": ObjectId(hackathon_id)})
+    if not hack:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hackathon not found")
+
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    prompt = PROBLEMS_PROMPT.format(
+        topic=hack.get("topic", ""),
+        description=hack.get("description", ""),
+        audience=hack.get("target_audience", ""),
+    )
+
+    # Run blocking call in thread
+    resp = await asyncio.to_thread(model.generate_content, prompt)
+    text = resp.text if hasattr(resp, "text") else str(resp)
+    
+    import json
+    import re
+    
+    # Parse JSON array from text
+    try:
+        problems = json.loads(text)
+    except Exception:
+        # Try to extract JSON array
+        match = re.search(r"\[[\s\S]*\]", text)
+        if match:
+            try:
+                problems = json.loads(match.group(0))
+            except Exception:
+                raise HTTPException(status_code=502, detail="Failed to parse problem statements from Gemini")
+        else:
+            raise HTTPException(status_code=502, detail="Failed to parse problem statements from Gemini")
+
+    # Update hackathon with problem statements
+    plan = hack.get("plan", {})
+    plan["problem_statements"] = problems
+    
+    doc = await db["hackathons"].find_one_and_update(
+        {"_id": hackathon_id if isinstance(hackathon_id, str) else ObjectId(hackathon_id)},
+        {"$set": {"plan": plan}},
+        return_document=ReturnDocument.AFTER,
+    )
+    if not doc and ObjectId.is_valid(hackathon_id):
+        doc = await db["hackathons"].find_one_and_update(
+            {"_id": ObjectId(hackathon_id)},
+            {"$set": {"plan": plan}},
+            return_document=ReturnDocument.AFTER,
+        )
+    
     return HackathonRead.model_validate(_normalize_id(doc))
 
 

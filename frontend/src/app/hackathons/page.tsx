@@ -146,7 +146,9 @@ export default function HackathonsPage() {
               <li key={h._id} className="glass p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <div className="font-semibold text-lg mb-1">{h.topic}</div>
+                    <a href={`/hackathons/${h._id}`} className="font-semibold text-lg mb-1 inline-block hover:underline">
+                      {h.topic}
+                    </a>
                     <div className="text-sm text-[var(--color-muted)] mb-2">
                       {h.location ? `${h.location} · ` : ""}
                       {h.start_date || ""}{h.end_date ? ` – ${h.end_date}` : ""}
@@ -169,6 +171,9 @@ export default function HackathonsPage() {
                     ) : null}
                   </div>
                   <div className="flex flex-col gap-2 min-w-[180px]">
+                    <Button onClick={() => window.location.href = `/hackathons/${h._id}`} variant="ghost">
+                      View Details
+                    </Button>
                     <Button onClick={() => invite(h._id)} disabled={invitingId === h._id}>
                       {invitingId === h._id ? "Inviting…" : "Create Invites"}
                     </Button>
