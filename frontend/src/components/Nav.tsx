@@ -7,6 +7,7 @@ const links = [
   { href: "/community", label: "Community" },
   { href: "/challenges", label: "Challenges" },
   { href: "/teams", label: "Teams" },
+  { href: "/hackathons", label: "Hackathons" },
 ];
 
 export default function Nav() {

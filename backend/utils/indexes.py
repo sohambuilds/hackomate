@@ -47,6 +47,9 @@ async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
     # teams
     await db["teams"].create_index("challenge_id", name="idx_challenge_id")
 
+    # hackathons
+    await db["hackathons"].create_index("topic", name="idx_hack_topic")
+
 
 __all__ = ["ensure_indexes"]
 

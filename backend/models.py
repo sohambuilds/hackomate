@@ -125,6 +125,91 @@ class TeamRead(MongoReadModel, TeamBase):
     pass
 
 
+# -----------------------------
+# Hackathon
+# -----------------------------
+class AgendaItem(BaseModel):
+    time: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+
+    model_config = {
+        "str_strip_whitespace": True,
+    }
+
+
+class Workshop(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+    model_config = {
+        "str_strip_whitespace": True,
+    }
+
+
+class HackathonPlan(BaseModel):
+    target_audience: Optional[str] = None
+    location: Optional[str] = None
+    dates: Optional[str] = None
+    workshops: List[Workshop] = Field(default_factory=list)
+    agenda: List[AgendaItem] = Field(default_factory=list)
+
+    model_config = {
+        "str_strip_whitespace": True,
+    }
+
+
+class HackathonBase(BaseModel):
+    topic: str
+    description: Optional[str] = None
+    target_audience: Optional[str] = None
+    location: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    status: str = "planned"
+    plan: Optional[HackathonPlan] = None
+
+    model_config = {
+        "str_strip_whitespace": True,
+    }
+
+
+class HackathonDraft(BaseModel):
+    topic: str
+    description: Optional[str] = None
+    target_audience: Optional[str] = None
+    location: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+
+    model_config = {
+        "str_strip_whitespace": True,
+    }
+
+
+class HackathonCreate(HackathonBase):
+    pass
+
+
+class HackathonUpdate(BaseModel):
+    topic: Optional[str] = None
+    description: Optional[str] = None
+    target_audience: Optional[str] = None
+    location: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    status: Optional[str] = None
+    plan: Optional[HackathonPlan] = None
+
+    model_config = {
+        "str_strip_whitespace": True,
+    }
+
+
+class HackathonRead(MongoReadModel, HackathonBase):
+    pass
+
+
 __all__ = [
     # UserProfile
     "UserProfileBase",
@@ -141,6 +226,15 @@ __all__ = [
     "TeamCreate",
     "TeamUpdate",
     "TeamRead",
+    # Hackathon
+    "AgendaItem",
+    "Workshop",
+    "HackathonPlan",
+    "HackathonBase",
+    "HackathonDraft",
+    "HackathonCreate",
+    "HackathonUpdate",
+    "HackathonRead",
 ]
 
 

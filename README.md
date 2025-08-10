@@ -20,6 +20,11 @@ This repo now has a FastAPI backend scaffolded with MongoDB integration and CRUD
   - `CRUD /challenges`
   - `CRUD /teams`
   - Team member management: `POST /teams/{team_id}/members/{user_id}`, `DELETE /teams/{team_id}/members/{user_id}`
+  - `Hackathons`:
+    - CRUD `/hackathons`
+    - Generate plan (Gemini) and create: `POST /hackathons/generate-plan`
+    - Create invites (messages): `POST /hackathons/{hackathon_id}/invite?limit=20`
+    - Send emails (Gmail SMTP): `POST /hackathons/{hackathon_id}/send-emails?limit=20&dry_run=true`
 
 ### Project structure (relevant to backend)
 ```
@@ -173,6 +178,36 @@ curl -sS -X DELETE http://localhost:8000/teams/TEAM_ID/members/USER_ID
 - Delete
 ```bash
 curl -sS -X DELETE http://localhost:8000/teams/ID
+```
+
+#### Hackathons
+- Generate plan (and create)
+```bash
+curl -sS -X POST http://localhost:8000/hackathons/generate-plan \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "AI for Finance",
+    "description": "Build tools for personal finance insights.",
+    "target_audience": "Developers, data scientists",
+    "location": "London",
+    "start_date": "2025-10-10",
+    "end_date": "2025-10-12"
+  }'
+```
+
+- List
+```bash
+curl -sS "http://localhost:8000/hackathons/?limit=20"
+```
+
+- Create invites for recent profiles
+```bash
+curl -sS -X POST "http://localhost:8000/hackathons/HACK_ID/invite?limit=10"
+```
+
+- Send emails (dry run by default)
+```bash
+curl -sS -X POST "http://localhost:8000/hackathons/HACK_ID/send-emails?limit=10&dry_run=true"
 ```
 
 ### Notes

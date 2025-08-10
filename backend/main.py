@@ -22,6 +22,7 @@ from .db import lifespan
 from .routers.challenges import router as challenges_router
 from .routers.profiles import router as profiles_router
 from .routers.teams import router as teams_router
+from .routers.hackathons import router as hackathons_router
 
 
 def _allowed_origins() -> list[str]:
@@ -113,5 +114,6 @@ async def health():
 app.include_router(profiles_router)
 app.include_router(challenges_router)
 app.include_router(teams_router)
+app.include_router(hackathons_router)
 
 
