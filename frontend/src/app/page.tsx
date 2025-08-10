@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Hero from "@/components/marketing/Hero";
 import FeatureGrid from "@/components/marketing/FeatureGrid";
 // Removed mid‑page brand strip to avoid visual noise on hero

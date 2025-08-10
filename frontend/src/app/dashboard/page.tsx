@@ -7,9 +7,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import PageHeader from "@/components/marketing/PageHeader";
 import { Button } from "@/components/ui/Button";
 
-type Profile = { _id: string };
+type Profile = { _id: string; name?: string; location?: string };
 type Team = { _id: string };
-type Challenge = { _id: string };
+type Challenge = { _id: string; title?: string; difficulty?: string };
+type TeamSummary = { _id: string; name: string; members?: string[] };
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -17,23 +18,23 @@ export default function DashboardPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [recentTeams, setRecentTeams] = useState<any[]>([]);
+  const [recentTeams, setRecentTeams] = useState<TeamSummary[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         const [p, t, c] = await Promise.all([
-          api.get("/profiles/", { params: { limit: 50 } }),
-          api.get("/teams", { params: { limit: 50 } }),
-          api.get("/challenges/", { params: { limit: 50 } }),
+          api.get<Profile[]>("/profiles/", { params: { limit: 50 } }),
+          api.get<TeamSummary[]>("/teams", { params: { limit: 50 } }),
+          api.get<Challenge[]>("/challenges/", { params: { limit: 50 } }),
         ]);
-        setProfiles(p.data || []);
-        setTeams(t.data || []);
-        setChallenges(c.data || []);
-        setRecentTeams((t.data || []).slice(0, 8));
-      } catch (e: any) {
-        setError(e?.message || "Failed to load");
+        setProfiles(p.data ?? []);
+        setTeams(t.data ?? []);
+        setChallenges(c.data ?? []);
+        setRecentTeams((t.data ?? []).slice(0, 8));
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "Failed to load");
       } finally {
         setLoading(false);
       }
@@ -75,7 +76,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <ul className="space-y-2">
-                {profiles.slice(0, 8).map((p: any) => (
+                {profiles.slice(0, 8).map((p: Profile) => (
                   <li key={p._id} className="flex justify-between text-sm">
                     <span>{p.name || "Unnamed"}</span>
                     <span className="text-[var(--color-muted)]">{p.location || ""}</span>
@@ -99,7 +100,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <ul className="space-y-2">
-                {challenges.slice(0, 8).map((c: any) => (
+                {challenges.slice(0, 8).map((c: Challenge) => (
                   <li key={c._id} className="flex justify-between text-sm">
                     <span>{c.title}</span>
                     <span className="text-[var(--color-muted)]">{c.difficulty}</span>
@@ -126,7 +127,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <ul className="space-y-2">
-                {recentTeams.map((t: any) => (
+                {recentTeams.map((t: TeamSummary) => (
                   <li key={t._id} className="flex justify-between text-sm">
                     <span className="font-medium">{t.name}</span>
                     <span className="text-[var(--color-muted)]">{t.members?.length || 0} members</span>

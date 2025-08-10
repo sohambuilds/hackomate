@@ -15,10 +15,10 @@ export default function CommunityPage() {
   const fetchProfiles = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/profiles/", { params: { limit: 50 } });
-      setProfiles(res.data || []);
-    } catch (e: any) {
-      setError(e?.message || "Failed to load");
+      const res = await api.get<Profile[]>("/profiles/", { params: { limit: 50 } });
+      setProfiles(res.data ?? []);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to load");
     } finally {
       setLoading(false);
     }

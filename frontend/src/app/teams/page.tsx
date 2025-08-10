@@ -5,10 +5,18 @@ import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import PageHeader from "@/components/marketing/PageHeader";
 
+type Team = {
+  _id: string;
+  name: string;
+  members?: string[];
+  skills_needed?: string[];
+  challenge_id?: string;
+};
+
 export default function TeamsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [teams, setTeams] = useState<any[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [query, setQuery] = useState("");
   const [filterChallenge, setFilterChallenge] = useState("");
 
@@ -16,10 +24,10 @@ export default function TeamsPage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await api.get("/teams", { params: { limit: 50 } });
-        setTeams(res.data || []);
-      } catch (e: any) {
-        setError(e?.message || "Failed to load");
+        const res = await api.get<Team[]>("/teams", { params: { limit: 50 } });
+        setTeams(res.data ?? []);
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "Failed to load");
       } finally {
         setLoading(false);
       }
@@ -61,7 +69,7 @@ export default function TeamsPage() {
             <Button onClick={() => { setQuery(""); setFilterChallenge(""); }} variant="ghost">Reset</Button>
           </div>
           <ul className="space-y-3">
-            {(loading ? [] : filtered).map((t: any) => (
+            {(loading ? [] : filtered).map((t: Team) => (
               <li key={t._id} className="glass glass-hover p-6 cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
