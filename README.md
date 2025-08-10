@@ -54,7 +54,14 @@ DB_NAME=hackathon_twin
 
 3) Run the server:
 ```bash
-uvicorn backend.main:app --reload --port 8000
+# Simple deployment (production)
+uv run main.py
+
+# Development with reload
+uv run uvicorn backend.main:app --reload --port 8000
+
+# Alternative using script entry point
+uv run serve
 ```
 
 4) Health check:
@@ -257,7 +264,7 @@ Gmail setup:
 ### End‑to‑end quick test
 ```bash
 # Run API
-uv run uvicorn backend.main:app --reload --port 8000
+uv run main.py
 
 # 1) Collect profiles
 python -m agents.recruitment_agent --query "AI developer" --limit 5
